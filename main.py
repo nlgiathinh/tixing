@@ -4,6 +4,9 @@ import asyncio
 import os  
 from flask import Flask  
 import threading  
+import time  
+from winotify import Notification, audio  
+import webbrowser  
 
 # Flask web server  
 app = Flask(__name__)  
@@ -22,18 +25,65 @@ intents.message_content = True
 intents.members = True  
 client = discord.Client(intents=intents)  
 
+# Add a cooldown dictionary  
+last_reminder = {}  
+
+# Define your specific server ID  
+TARGET_SERVER_ID = 1136120835237740547  # Replace with your server ID  
+YOUR_USER_ID = 600231556035903518  # Replace with your Discord user ID  
+
+def create_notification(title, message, channel_url):  
+    toast = Notification(  
+        app_id="Discord Bot",  
+        title=title,  
+        msg=message,  
+        duration="short",  
+    )  
+    
+    # Add click action  
+    toast.add_actions(label="Go to Channel", launch=channel_url)  
+    
+    # Set notification sound  
+    toast.set_audio(audio.Mail, loop=False)  
+    
+    return toast  
+
 @client.event  
 async def on_ready():  
     print(f'Bot is ready as {client.user}')  
 
 @client.event  
 async def on_message(message):  
+    # Check for mentions in the specific server  
+    if message.guild and message.guild.id == TARGET_SERVER_ID:  
+        if client.user.id != message.author.id:  # Prevent self-notifications  
+            # Check if the specified user is mentioned  
+            for mention in message.mentions:  
+                if mention.id == YOUR_USER_ID:  
+                    # Create Discord channel URL  
+                    channel_url = f"discord://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"  
+                    
+                    # Create and show notification  
+                    notification = create_notification(  
+                        f"Mentioned in {message.guild.name}",  
+                        f"{message.author.name}: {message.content[:50]}...",  
+                        channel_url  
+                    )  
+                    notification.show()  
+                    break  
+
+    # Original drop reminder code  
     if "frostdrop_'s drop" in message.content.lower():  
+        current_time = time.time()  
+        if message.channel.id in last_reminder:  
+            if current_time - last_reminder[message.channel.id] < 10:  
+                return  
+                
         await asyncio.sleep(5)  
         for member in message.guild.members:  
             if member.name == "frostdrop_":  
-                # Reply to the original message instead of sending a new one  
                 await message.reply(f"{member.mention} 15 minutes have passed since your drop!")  
+                last_reminder[message.channel.id] = current_time  
                 break  
 
 # Run both Flask and Discord bot  
