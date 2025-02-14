@@ -28,8 +28,9 @@ client = discord.Client(intents=intents)
 last_reminder = {}  
 
 # Define your specific server ID  
-TARGET_SERVER_ID = 911959539711086663  # Replace with your server ID  
+TARGET_SERVER_ID = 1136120835237740547  # Replace with your server ID  
 YOUR_USER_ID = 600231556035903518  # Replace with your Discord user ID  
+RYUJIN_BOT_ID = 1056379876988440647  # Ryujin bot's ID  
 
 # Only import winotify if running on Windows  
 if platform.system() == 'Windows':  
@@ -48,7 +49,6 @@ if platform.system() == 'Windows':
         return toast  
 else:  
     def create_notification(title, message, channel_url):  
-        # Do nothing on non-Windows platforms  
         pass  
 
 @client.event  
@@ -63,10 +63,8 @@ async def on_message(message):
             # Check if the specified user is mentioned  
             for mention in message.mentions:  
                 if mention.id == YOUR_USER_ID:  
-                    # Create Discord channel URL  
                     channel_url = f"discord://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"  
                     
-                    # Only show notification if running on Windows  
                     if platform.system() == 'Windows':  
                         notification = create_notification(  
                             f"Mentioned in {message.guild.name}",  
@@ -76,19 +74,22 @@ async def on_message(message):
                         notification.show()  
                     break  
 
-    # Original drop reminder code  
-    if "frostdrop_'s drop" in message.content.lower():  
+    # New cooldown reminder code  
+    # Check if the message is from Ryujin bot and contains a cooldown embed  
+    if message.author.id == RYUJIN_BOT_ID and message.interaction and message.interaction.command.name == "cooldown":  
         current_time = time.time()  
+        
+        # Add cooldown check  
         if message.channel.id in last_reminder:  
-            if current_time - last_reminder[message.channel.id] < 10:  
+            if current_time - last_reminder[message.channel.id] < 10:  # 10 seconds cooldown  
                 return  
-                
-        await asyncio.sleep(5)  
-        for member in message.guild.members:  
-            if member.name == "frostdrop_":  
-                await message.reply(f"{member.mention} 15 minutes have passed since your drop!")  
-                last_reminder[message.channel.id] = current_time  
-                break  
+
+        # Get the user who initiated the cooldown command  
+        command_user = message.interaction.user  
+        
+        await asyncio.sleep(900)  # 15 minutes = 900 seconds  
+        await message.channel.send(f"{command_user.mention} 15 minutes have passed since your drop!")  
+        last_reminder[message.channel.id] = current_time  
 
 # Run both Flask and Discord bot  
 def run_bot():  
