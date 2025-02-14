@@ -28,7 +28,7 @@ client = discord.Client(intents=intents)
 last_reminder = {}  
 
 # Define your specific server ID  
-TARGET_SERVER_ID = 1136120835237740547  # Replace with your server ID  
+TARGET_SERVER_ID = 1136120835237740547  # Ryujin server ID  
 YOUR_USER_ID = 600231556035903518  # Replace with your Discord user ID  
 RYUJIN_BOT_ID = 1056379876988440647  # Ryujin bot's ID  
 
@@ -75,21 +75,33 @@ async def on_message(message):
                     break  
 
     # New cooldown reminder code  
-    # Check if the message is from Ryujin bot and contains a cooldown embed  
-    if message.author.id == RYUJIN_BOT_ID and message.interaction and message.interaction.command.name == "cooldowns":  
-        current_time = time.time()  
-        
-        # Add cooldown check  
-        if message.channel.id in last_reminder:  
-            if current_time - last_reminder[message.channel.id] < 10:  # 10 seconds cooldown  
-                return  
+    if message.author.id == RYUJIN_BOT_ID:  
+        # Check if the message has embeds (Ryujin bot typically responds with embeds)  
+        if message.embeds and len(message.embeds) > 0:  
+            embed = message.embeds[0]  
+            
+            # Check if it's a cooldown command response  
+            if embed.title and "Cooldown" in embed.title:  
+                current_time = time.time()  
+                
+                # Add cooldown check  
+                if message.channel.id in last_reminder:  
+                    if current_time - last_reminder[message.channel.id] < 10:  # 10 seconds cooldown  
+                        return  
 
-        # Get the user who initiated the cooldown command  
-        command_user = message.interaction.user  
-        
-        await asyncio.sleep(5)  # 15 minutes = 900 seconds  
-        await message.channel.send(f"{command_user.mention} 15 minutes have passed since your drop!")  
-        last_reminder[message.channel.id] = current_time  
+                # Find the user who triggered the command from the embed description  
+                if embed.description:  
+                    # Wait 15 minutes  
+                    await asyncio.sleep(5)  # 15 minutes = 900 seconds  
+                    
+                    # Send reminder  
+                    try:  
+                        await message.channel.send(f"{message.interaction.user.mention} 15 minutes have passed since your drop!")  
+                        last_reminder[message.channel.id] = current_time  
+                    except:  
+                        # Fallback if interaction user is not available  
+                        await message.channel.send("15 minutes have passed since the last drop!")  
+                        last_reminder[message.channel.id] = current_time  
 
 # Run both Flask and Discord bot  
 def run_bot():  
