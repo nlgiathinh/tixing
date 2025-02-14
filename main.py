@@ -29,7 +29,7 @@ async def on_ready():
 @client.event  
 async def on_message(message):  
     if "frostdrop_'s drop" in message.content.lower():  
-        await asyncio.sleep(15 * 60)  
+        await asyncio.sleep(5)  
         for member in message.guild.members:  
             if member.name == "frostdrop_":  
                 await message.channel.send(f"{member.mention} 15 minutes have passed since your drop!")  
