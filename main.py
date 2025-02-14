@@ -32,7 +32,8 @@ async def on_message(message):
         await asyncio.sleep(5)  
         for member in message.guild.members:  
             if member.name == "frostdrop_":  
-                await message.channel.send(f"{member.mention} 15 minutes have passed since your drop!")  
+                # Reply to the original message instead of sending a new one  
+                await message.reply(f"{member.mention} 15 minutes have passed since your drop!")  
                 break  
 
 # Run both Flask and Discord bot  
