@@ -76,7 +76,7 @@ async def on_message(message):
 
     # New cooldown reminder code  
     # Check if the message is from Ryujin bot and contains a cooldown embed  
-    if message.author.id == RYUJIN_BOT_ID and message.interaction and message.interaction.command.name == "cooldown":  
+    if message.author.id == RYUJIN_BOT_ID and message.interaction and message.interaction.command.name == "cooldowns":  
         current_time = time.time()  
         
         # Add cooldown check  
@@ -87,7 +87,7 @@ async def on_message(message):
         # Get the user who initiated the cooldown command  
         command_user = message.interaction.user  
         
-        await asyncio.sleep(900)  # 15 minutes = 900 seconds  
+        await asyncio.sleep(5)  # 15 minutes = 900 seconds  
         await message.channel.send(f"{command_user.mention} 15 minutes have passed since your drop!")  
         last_reminder[message.channel.id] = current_time  
 
