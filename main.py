@@ -81,7 +81,7 @@ async def on_message(message):
             embed = message.embeds[0]  
             
             # Check if it's a cooldown command response  
-            if embed.title and "Cooldown" in embed.title:  
+            if embed.title and "cooldowns" in embed.title:  
                 current_time = time.time()  
                 
                 # Add cooldown check  
