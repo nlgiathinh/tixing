@@ -5,8 +5,7 @@ import os
 from flask import Flask  
 import threading  
 import time  
-from winotify import Notification, audio  
-import webbrowser  
+import platform  
 
 # Flask web server  
 app = Flask(__name__)  
@@ -29,24 +28,28 @@ client = discord.Client(intents=intents)
 last_reminder = {}  
 
 # Define your specific server ID  
-TARGET_SERVER_ID = 1136120835237740547  # Replace with your server ID  
+TARGET_SERVER_ID = 911959539711086663  # Replace with your server ID  
 YOUR_USER_ID = 600231556035903518  # Replace with your Discord user ID  
 
-def create_notification(title, message, channel_url):  
-    toast = Notification(  
-        app_id="Discord Bot",  
-        title=title,  
-        msg=message,  
-        duration="short",  
-    )  
+# Only import winotify if running on Windows  
+if platform.system() == 'Windows':  
+    from winotify import Notification, audio  
     
-    # Add click action  
-    toast.add_actions(label="Go to Channel", launch=channel_url)  
-    
-    # Set notification sound  
-    toast.set_audio(audio.Mail, loop=False)  
-    
-    return toast  
+    def create_notification(title, message, channel_url):  
+        toast = Notification(  
+            app_id="Discord Bot",  
+            title=title,  
+            msg=message,  
+            duration="short",  
+        )  
+        
+        toast.add_actions(label="Go to Channel", launch=channel_url)  
+        toast.set_audio(audio.Mail, loop=False)  
+        return toast  
+else:  
+    def create_notification(title, message, channel_url):  
+        # Do nothing on non-Windows platforms  
+        pass  
 
 @client.event  
 async def on_ready():  
@@ -63,13 +66,14 @@ async def on_message(message):
                     # Create Discord channel URL  
                     channel_url = f"discord://discord.com/channels/{message.guild.id}/{message.channel.id}/{message.id}"  
                     
-                    # Create and show notification  
-                    notification = create_notification(  
-                        f"Mentioned in {message.guild.name}",  
-                        f"{message.author.name}: {message.content[:50]}...",  
-                        channel_url  
-                    )  
-                    notification.show()  
+                    # Only show notification if running on Windows  
+                    if platform.system() == 'Windows':  
+                        notification = create_notification(  
+                            f"Mentioned in {message.guild.name}",  
+                            f"{message.author.name}: {message.content[:50]}...",  
+                            channel_url  
+                        )  
+                        notification.show()  
                     break  
 
     # Original drop reminder code  
