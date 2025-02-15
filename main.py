@@ -16,8 +16,9 @@ client = discord.Client(intents=intents)
 # Add a cooldown dictionary  
 last_reminder = {}  
 
-# Define your specific server ID  
+# Define your specific server ID and user ID  
 TARGET_SERVER_ID = 1136120835237740547  
+TARGET_USER_ID = 600231556035903518  
 TARGET_USER = "frostdrop_"  
 
 @client.event  
@@ -30,9 +31,9 @@ async def on_ready():
 @client.event  
 async def on_message(message):  
     if message.guild and message.guild.id == TARGET_SERVER_ID:  
-        # Check if message is from Ryujin AND mentions frostdrop_  
-        if message.author.name == "Ryujin" and TARGET_USER in message.content:  
-            print(f"Trigger detected: Ryujin mentioned {TARGET_USER}")  
+        # Check if message is from Ryujin AND mentions the target user ID  
+        if message.author.name == "Ryujin" and str(TARGET_USER_ID) in message.content:  
+            print(f"Trigger detected: Ryujin mentioned user with ID {TARGET_USER_ID}")  
             current_time = time.time()  
             
             # Add cooldown check  
@@ -43,17 +44,13 @@ async def on_message(message):
             
             try:  
                 # Find frostdrop_'s member object  
-                target_member = None  
-                for member in message.guild.members:  
-                    if member.name == TARGET_USER:  
-                        target_member = member  
-                        break  
+                target_member = message.guild.get_member(TARGET_USER_ID)  
 
-                await asyncio.sleep(900)  # 5 second delay  
+                await asyncio.sleep(900)  # 15 minutes delay  
                 if target_member:  
                     await message.channel.send(f"{target_member.mention} Cooldown timer!")  
                 else:  
-                    await message.channel.send(f"@{TARGET_USER} Cooldown timer!")  
+                    await message.channel.send(f"<@{TARGET_USER_ID}> Cooldown timer!")  
                 print("Reminder sent!")  
                 last_reminder[message.channel.id] = current_time  
             except Exception as e:  
