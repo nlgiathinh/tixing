@@ -42,7 +42,7 @@ async def on_message(message):
                     return  
             
             try:  
-                await asyncio.sleep(900)  # 5 second delay  
+                await asyncio.sleep(5)  # 5 second delay  
                 await message.channel.send(f"{message.author.mention} Cooldown timer!")  
                 print("Reminder sent!")  
                 last_reminder[message.channel.id] = current_time  
