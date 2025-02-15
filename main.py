@@ -42,8 +42,18 @@ async def on_message(message):
                     return  
             
             try:  
-                await asyncio.sleep(5)  # 5 second delay  
-                await message.channel.send(f"{message.author.mention} Cooldown timer!")  
+                # Find frostdrop_'s member object  
+                target_member = None  
+                for member in message.guild.members:  
+                    if member.name == TARGET_USER:  
+                        target_member = member  
+                        break  
+
+                await asyncio.sleep(900)  # 5 second delay  
+                if target_member:  
+                    await message.channel.send(f"{target_member.mention} Cooldown timer!")  
+                else:  
+                    await message.channel.send(f"@{TARGET_USER} Cooldown timer!")  
                 print("Reminder sent!")  
                 last_reminder[message.channel.id] = current_time  
             except Exception as e:  
